@@ -3,11 +3,13 @@ Import-Module UEM_Core -force
 
 #Your XAML goes here :)
 $inputXML = @"
-<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+<Window x:Class="UEM_Console1.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UEM_Console1"
+        mc:Ignorable="d"
         Title="UEM Console" Height="450" Width="345" ResizeMode="NoResize" >
     <Window.Resources>
         <Style TargetType="Window">
@@ -62,7 +64,8 @@ $inputXML = @"
             <Setter Property="BorderBrush" Value="Black" />
         </Style>
         <Style TargetType="TextBlock" BasedOn="{StaticResource TextBlockBase}" />
-        <!-- End Textblock Styles-->
+        <!-- End Textblock Styles -->
+        <!-- Start Button Styles -->
         <Style x:Key="ButtonBase" TargetType="Button">
             <Setter Property="HorizontalAlignment" Value="Left" />
             <Setter Property="VerticalAlignment" Value="Center" />
@@ -73,7 +76,7 @@ $inputXML = @"
             <Setter Property="Margin" Value="1" />
             <Setter Property="FontSize" Value="9" />
             <Setter Property="Background" Value="LightGray" />
-			<Setter Property="IsEnabled" Value="False" />
+            <Setter Property="IsEnabled" Value="False" />
             <Style.Triggers>
                 <!--<EventTrigger RoutedEvent="Button.Click">
                     <EventTrigger.Actions>
@@ -107,6 +110,7 @@ $inputXML = @"
             <Setter Property="Width" Value="55" />
         </Style>
         <Style TargetType="Button" BasedOn="{StaticResource ButtonBase}" />
+        <!-- End Button Styles -->
         <Style TargetType="DataGrid">
             <Setter Property="Width" Value="240" />
             <Setter Property="HeadersVisibility" Value="None" />
@@ -127,14 +131,15 @@ $inputXML = @"
             <RowDefinition Height="22" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button x:Name="GetUser_btn" Content="Get User" />
-            <Button x:Name="clear_btn" Content="Clear" />
-            <Button x:Name="SetActivation_btn" Content="Set Activation Password" FontSize="8" Width="95"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button x:Name="GetUser_btn" Content="Get User" IsEnabled="True" Style="{StaticResource Menu_btn}" />
+            <Button x:Name="clear_btn" Content="Clear" Style="{StaticResource Menu_btn}" />
+            <Button x:Name="SetActivation_btn" Content="Set Activation Password" FontSize="8" Width="90" />
+            <Button x:Name="RemoveActivation_btn" Content="Remove Activation Passwords" FontSize="8" />
         </StackPanel>
         <Grid Margin="0,2" Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="85" />
+                <ColumnDefinition Width="90" />
                 <ColumnDefinition Width="240" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
@@ -153,21 +158,39 @@ $inputXML = @"
             <Label Content="GUID:" Grid.Row="3" />
             <Label Content="Created:" Grid.Row="4" />
             <Label Content="Directory ID:" Grid.Row="5" />
-            <Label Content="Groups:" Grid.Row="6" />
-            <Label Content="Device(s):" Grid.Row="7" VerticalAlignment="Top"/>
-            <TextBox x:Name="uemEmailAddress" />
-            <TextBox x:Name="uemDisplayName" Grid.Row="1" />
-            <TextBox x:Name="uemName" Grid.Row="2" />
-            <TextBox x:Name="uemGuid" Grid.Row="3" />
-            <TextBox x:Name="uemCreated" Grid.Row="4" />
-            <TextBox x:Name="uemDirectoryId" Grid.Row="5" />
+            <Grid Grid.Row="6">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="45" />
+                        <ColumnDefinition Width="45" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="22" />
+                        <RowDefinition Height="22" />
+                    </Grid.RowDefinitions>
+                    <Label Content="Groups:" Grid.ColumnSpan="2"/>
+                    <Button x:Name="addGroup_btn" Content="Add" Width="40" Grid.Row="1" HorizontalAlignment="Right" />
+                    <Button x:Name="removeGroup_btn" Content="Remove" Width="40" Grid.Row="1" Grid.Column="1" />
+                </Grid>
+            </Grid>
+            <StackPanel Grid.Row="7">
+                <Label Content="Device(s):" VerticalAlignment="Top" />
+                <Button x:Name="RemoveDevice_btn" Content="Remove Device" FontSize="8" Width="80" HorizontalAlignment="Center" />
+            </StackPanel>
+            <TextBox x:Name="uemEmailAddress_TB" IsReadOnly="False" />
+            <TextBox x:Name="uemDisplayName_TB" Grid.Row="1" />
+            <TextBox x:Name="uemName_TB" Grid.Row="2" />
+            <TextBox x:Name="uemGuid_TB" Grid.Row="3" />
+            <TextBox x:Name="uemCreated_TB" Grid.Row="4" />
+            <TextBox x:Name="uemDirectoryId_TB" Grid.Row="5" />
             <DataGrid x:Name="uemGroup_DG" Grid.Row="6" VerticalAlignment="Top" Height="40">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Guid" Width="Auto" Binding="{Binding Guid}" />
                     <DataGridTextColumn Header="Name" Width="Auto" Binding="{Binding Name}" />
-                </DataGrid.Columns>
+                </DataGrid.Columns>                
             </DataGrid>
-			<DataGrid x:Name="uemDevice_DG" Grid.Row="7" VerticalAlignment="Top" Height="200" HeadersVisibility="Column">
+            <TextBox x:Name="uemDevice_TB" Grid.Row="7" Height="200" TextWrapping="Wrap" VerticalScrollBarVisibility="Visible"/>
+            <DataGrid x:Name="uemDevice_DG" Grid.Row="7" Height="200" HeadersVisibility="Column">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="EnrollmentType" Width="Auto" Binding="{Binding EnrollmentType}" />
                     <DataGridTextColumn Header="guid" Width="Auto" Binding="{Binding guid}" />
@@ -191,7 +214,6 @@ $inputXML = @"
                     <DataGridTextColumn Header="wifiMacAddress" Width="Auto" Binding="{Binding wifiMacAddress}" />
                 </DataGrid.Columns>
             </DataGrid>
-			<!--<TextBox x:Name="uemDevices" Grid.Row="7" Height="200" TextWrapping="Wrap" VerticalScrollBarVisibility="Visible"/>-->
         </Grid>
     </Grid>
 </Window>
